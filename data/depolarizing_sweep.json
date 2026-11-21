@@ -1,0 +1,191 @@
+[
+  {
+    "depolarizingP": 0,
+    "theoreticalMaxS": 2.8284271247461894,
+    "fixedAngleS": 2.8284271247461894,
+    "classicalBound": 2,
+    "tsirelsonBound": 2.8284271247461903,
+    "isBellNonlocal": true,
+    "isEntangled": true
+  },
+  {
+    "depolarizingP": 0.020000000000000004,
+    "theoreticalMaxS": 2.7718585822512654,
+    "fixedAngleS": 2.771858582251266,
+    "classicalBound": 2,
+    "tsirelsonBound": 2.8284271247461903,
+    "isBellNonlocal": true,
+    "isEntangled": true
+  },
+  {
+    "depolarizingP": 0.04000000000000001,
+    "theoreticalMaxS": 2.7152900397563418,
+    "fixedAngleS": 2.715290039756342,
+    "classicalBound": 2,
+    "tsirelsonBound": 2.8284271247461903,
+    "isBellNonlocal": true,
+    "isEntangled": true
+  },
+  {
+    "depolarizingP": 0.06,
+    "theoreticalMaxS": 2.658721497261418,
+    "fixedAngleS": 2.658721497261418,
+    "classicalBound": 2,
+    "tsirelsonBound": 2.8284271247461903,
+    "isBellNonlocal": true,
+    "isEntangled": true
+  },
+  {
+    "depolarizingP": 0.08000000000000002,
+    "theoreticalMaxS": 2.602152954766494,
+    "fixedAngleS": 2.602152954766494,
+    "classicalBound": 2,
+    "tsirelsonBound": 2.8284271247461903,
+    "isBellNonlocal": true,
+    "isEntangled": true
+  },
+  {
+    "depolarizingP": 0.1,
+    "theoreticalMaxS": 2.5455844122715705,
+    "fixedAngleS": 2.5455844122715705,
+    "classicalBound": 2,
+    "tsirelsonBound": 2.8284271247461903,
+    "isBellNonlocal": true,
+    "isEntangled": true
+  },
+  {
+    "depolarizingP": 0.12,
+    "theoreticalMaxS": 2.489015869776647,
+    "fixedAngleS": 2.4890158697766465,
+    "classicalBound": 2,
+    "tsirelsonBound": 2.8284271247461903,
+    "isBellNonlocal": true,
+    "isEntangled": true
+  },
+  {
+    "depolarizingP": 0.13999999999999999,
+    "theoreticalMaxS": 2.432447327281723,
+    "fixedAngleS": 2.4324473272817224,
+    "classicalBound": 2,
+    "tsirelsonBound": 2.8284271247461903,
+    "isBellNonlocal": true,
+    "isEntangled": true
+  },
+  {
+    "depolarizingP": 0.16000000000000003,
+    "theoreticalMaxS": 2.375878784786799,
+    "fixedAngleS": 2.375878784786799,
+    "classicalBound": 2,
+    "tsirelsonBound": 2.8284271247461903,
+    "isBellNonlocal": true,
+    "isEntangled": true
+  },
+  {
+    "depolarizingP": 0.18000000000000002,
+    "theoreticalMaxS": 2.319310242291875,
+    "fixedAngleS": 2.319310242291875,
+    "classicalBound": 2,
+    "tsirelsonBound": 2.8284271247461903,
+    "isBellNonlocal": true,
+    "isEntangled": true
+  },
+  {
+    "depolarizingP": 0.2,
+    "theoreticalMaxS": 2.2627416997969516,
+    "fixedAngleS": 2.262741699796951,
+    "classicalBound": 2,
+    "tsirelsonBound": 2.8284271247461903,
+    "isBellNonlocal": true,
+    "isEntangled": true
+  },
+  {
+    "depolarizingP": 0.22000000000000003,
+    "theoreticalMaxS": 2.2061731573020276,
+    "fixedAngleS": 2.206173157302028,
+    "classicalBound": 2,
+    "tsirelsonBound": 2.8284271247461903,
+    "isBellNonlocal": true,
+    "isEntangled": true
+  },
+  {
+    "depolarizingP": 0.24,
+    "theoreticalMaxS": 2.149604614807104,
+    "fixedAngleS": 2.1496046148071035,
+    "classicalBound": 2,
+    "tsirelsonBound": 2.8284271247461903,
+    "isBellNonlocal": true,
+    "isEntangled": true
+  },
+  {
+    "depolarizingP": 0.26,
+    "theoreticalMaxS": 2.0930360723121804,
+    "fixedAngleS": 2.09303607231218,
+    "classicalBound": 2,
+    "tsirelsonBound": 2.8284271247461903,
+    "isBellNonlocal": true,
+    "isEntangled": true
+  },
+  {
+    "depolarizingP": 0.27999999999999997,
+    "theoreticalMaxS": 2.0364675298172563,
+    "fixedAngleS": 2.0364675298172563,
+    "classicalBound": 2,
+    "tsirelsonBound": 2.8284271247461903,
+    "isBellNonlocal": true,
+    "isEntangled": true
+  },
+  {
+    "depolarizingP": 0.30000000000000004,
+    "theoreticalMaxS": 1.9798989873223325,
+    "fixedAngleS": 1.9798989873223323,
+    "classicalBound": 2,
+    "tsirelsonBound": 2.8284271247461903,
+    "isBellNonlocal": false,
+    "isEntangled": true
+  },
+  {
+    "depolarizingP": 0.32000000000000006,
+    "theoreticalMaxS": 1.9233304448274087,
+    "fixedAngleS": 1.9233304448274091,
+    "classicalBound": 2,
+    "tsirelsonBound": 2.8284271247461903,
+    "isBellNonlocal": false,
+    "isEntangled": true
+  },
+  {
+    "depolarizingP": 0.34,
+    "theoreticalMaxS": 1.866761902332485,
+    "fixedAngleS": 1.8667619023324853,
+    "classicalBound": 2,
+    "tsirelsonBound": 2.8284271247461903,
+    "isBellNonlocal": false,
+    "isEntangled": true
+  },
+  {
+    "depolarizingP": 0.36000000000000004,
+    "theoreticalMaxS": 1.810193359837561,
+    "fixedAngleS": 1.8101933598375615,
+    "classicalBound": 2,
+    "tsirelsonBound": 2.8284271247461903,
+    "isBellNonlocal": false,
+    "isEntangled": true
+  },
+  {
+    "depolarizingP": 0.38,
+    "theoreticalMaxS": 1.7536248173426374,
+    "fixedAngleS": 1.7536248173426374,
+    "classicalBound": 2,
+    "tsirelsonBound": 2.8284271247461903,
+    "isBellNonlocal": false,
+    "isEntangled": true
+  },
+  {
+    "depolarizingP": 0.4,
+    "theoreticalMaxS": 1.6970562748477136,
+    "fixedAngleS": 1.6970562748477134,
+    "classicalBound": 2,
+    "tsirelsonBound": 2.8284271247461903,
+    "isBellNonlocal": false,
+    "isEntangled": true
+  }
+]

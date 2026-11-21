@@ -1,0 +1,97 @@
+{
+  "hardwarePreset": "IBM Quantum Eagle (Calibrated Presets)",
+  "totalShotBudget": 4096,
+  "algorithms": [
+    {
+      "algorithm": "1. Horodecki Analytical (Ground Truth)",
+      "sValue": 2.5935592903884723,
+      "stdErr": 0,
+      "zScore": null,
+      "evaluationsOrShots": 0,
+      "note": "Exact algebraic maximum from density matrix"
+    },
+    {
+      "algorithm": "2. Fixed-Angle CHSH Baseline",
+      "sValue": 2.443359375,
+      "stdErr": 0.04945629411037623,
+      "zScore": 8.964670381701337,
+      "evaluationsOrShots": 4096,
+      "note": "Standard textbook angles (0, 90, 45, -45 deg)"
+    },
+    {
+      "algorithm": "3. Exhaustive Grid Search",
+      "sValue": 2.2821009540991426,
+      "stdErr": null,
+      "zScore": null,
+      "evaluationsOrShots": 1728,
+      "note": "Coarse 4D hypercube sampling"
+    },
+    {
+      "algorithm": "4. Differential Evolution",
+      "sValue": 2.562322808887985,
+      "stdErr": null,
+      "zScore": null,
+      "evaluationsOrShots": 315,
+      "note": "Global stochastic population search"
+    },
+    {
+      "algorithm": "5. SPSA Optimizer",
+      "sValue": 2.890625,
+      "stdErr": null,
+      "zScore": null,
+      "evaluationsOrShots": 91,
+      "note": "2-measurement gradient-free stochastic approximation"
+    },
+    {
+      "algorithm": "6. Bayesian Optimization (GP)",
+      "sValue": 2.4874976383996534,
+      "stdErr": null,
+      "zScore": null,
+      "evaluationsOrShots": 20,
+      "note": "Gaussian Process surrogate with UCB acquisition"
+    },
+    {
+      "algorithm": "7. Proposed NA-UAO (Novel Contribution)",
+      "sValue": 2.3128258213388206,
+      "stdErr": 0.06651397830653065,
+      "zScore": 4.7031590848040725,
+      "evaluationsOrShots": 4096,
+      "varianceReductionPct": 0,
+      "note": "Noise-adaptive angles + Neyman-optimal dynamic shot allocation"
+    }
+  ],
+  "nauaoSummary": {
+    "method": "Noise-Adaptive & Uncertainty-Aware Optimization (NA-UAO)",
+    "finalS": 2.3128258213388206,
+    "stdErr": 0.06651397830653065,
+    "zScore": 4.7031590848040725,
+    "pValue": 0.0000012823235934766863,
+    "ci95": [
+      2.1824584238580207,
+      2.4431932188196206
+    ],
+    "totalShotsUsed": 4096,
+    "optimalAngles": {
+      "thetaA": 0,
+      "thetaAPrime": 1.5707963267948966,
+      "thetaB": 0.7447716149753455,
+      "thetaBPrime": -0.7990872150787334
+    },
+    "neymanAllocations": [
+      505,
+      574,
+      630,
+      751
+    ],
+    "uniformBaseline": {
+      "s": 2.431640625,
+      "stdErr": 0.04962030575695725,
+      "zScore": 8.698870722687552,
+      "pValue": 0
+    },
+    "varianceReductionPct": 0,
+    "zScoreImprovement": -3.9957116378834794,
+    "isFiveSigmaDiscovery": false,
+    "horodeckiSMax": 2.8284271247461894
+  }
+}

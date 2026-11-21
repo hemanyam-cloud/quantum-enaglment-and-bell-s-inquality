@@ -1,0 +1,24 @@
+{
+  "name": "quantum-bell-platform",
+  "version": "1.0.0",
+  "description": "Computational and Experimental Investigation of Quantum Entanglement and Bell's Inequality Violation with Noise-Adaptive Optimization",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "node scripts/run_chsh_demo.js",
+    "lhv": "node scripts/run_classical_lhv.js",
+    "benchmark": "node scripts/run_benchmarks.js",
+    "report": "node scripts/generate_report.js"
+  },
+  "keywords": [
+    "quantum-computing",
+    "quantum-entanglement",
+    "bell-inequality",
+    "chsh",
+    "tsirelson-bound",
+    "noise-adaptive-optimization",
+    "horodecki"
+  ],
+  "author": "Quantum Research Team",
+  "license": "MIT"
+}

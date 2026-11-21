@@ -25,7 +25,8 @@ const benchResult = BenchmarkRunner.runAlgorithmComparison({
 const sweepData = BenchmarkRunner.runDepolarizingSweep(25);
 
 const reportPath = path.join(reportsDir, 'quantum_bell_research_report.md');
-ReportGenerator.generateMarkdownReport(benchResult, sweepData, reportPath);
+const md = ReportGenerator.generateMarkdownReport(benchResult, sweepData);
+fs.writeFileSync(reportPath, md, 'utf-8');
 
 console.log(`\nReport successfully generated at: ${reportPath}`);
 console.log('='.repeat(70));

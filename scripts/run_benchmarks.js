@@ -53,10 +53,8 @@ fs.writeFileSync(
   JSON.stringify(sweepData, null, 2),
   'utf-8'
 );
-ReportGenerator.exportSweepCSV(
-  sweepData,
-  path.join(dataDir, 'depolarizing_sweep.csv')
-);
+const sweepCsv = ReportGenerator.exportSweepCSV(sweepData);
+fs.writeFileSync(path.join(dataDir, 'depolarizing_sweep.csv'), sweepCsv, 'utf-8');
 
 console.log('\n' + '='.repeat(70));
 console.log('Datasets successfully written to ./data/');

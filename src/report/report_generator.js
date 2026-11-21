@@ -1,15 +1,14 @@
 /**
  * Automated Research Report Generator:
  * Generates scientific reports (Markdown & HTML) and CSV/JSON datasets.
+ * Pure ESM module compatible with both Node.js and modern Web Browsers.
  */
-import fs from 'fs';
-import path from 'path';
 
 export class ReportGenerator {
   /**
    * Generates a comprehensive research report in Markdown.
    */
-  static generateMarkdownReport(benchmarkResults, sweepData, outputPath) {
+  static generateMarkdownReport(benchmarkResults, sweepData) {
     const timestamp = new Date().toISOString();
     let md = `# Research Report: Quantum Entanglement, Bell’s Inequality Violation, and Noise-Adaptive Measurement Optimization\n\n`;
     md += `**Date:** ${timestamp}  \n`;
@@ -53,11 +52,13 @@ export class ReportGenerator {
 
     md += `\n## 4. Analysis of Proposed Research Contribution (NA-UAO)\n\n`;
     const summary = benchmarkResults.nauaoSummary;
-    md += `- **Optimized $S$ Parameter:** ${summary.finalS.toFixed(4)} $\\pm$ ${summary.stdErr.toFixed(4)}\n`;
-    md += `- **Statistical Significance ($Z$-score):** ${summary.zScore.toFixed(2)} standard deviations above classical bound ($p < ${summary.pValue.toExponential(3)})\n`;
-    md += `- **$5\\sigma$ Discovery Standard Achieved:** ${summary.isFiveSigmaDiscovery ? 'YES (Definitive Nonlocality Reached)' : 'No'}\n`;
-    md += `- **Variance Reduction via Neyman Allocation:** **${summary.varianceReductionPct.toFixed(2)}%** reduction in witness variance compared to uniform shot allocation\n`;
-    md += `- **Optimal Neyman Shot Distribution:** $[N_{ab}, N_{ab'}, N_{a'b}, N_{a'b'}] = [${summary.neymanAllocations.join(', ')}]$\n\n`;
+    if (summary) {
+      md += `- **Optimized $S$ Parameter:** ${summary.finalS.toFixed(4)} $\\pm$ ${summary.stdErr.toFixed(4)}\n`;
+      md += `- **Statistical Significance ($Z$-score):** ${summary.zScore.toFixed(2)} standard deviations above classical bound ($p < ${summary.pValue.toExponential(3)})\n`;
+      md += `- **$5\\sigma$ Discovery Standard Achieved:** ${summary.isFiveSigmaDiscovery ? 'YES (Definitive Nonlocality Reached)' : 'No'}\n`;
+      md += `- **Variance Reduction via Neyman Allocation:** **${summary.varianceReductionPct.toFixed(2)}%** reduction in witness variance compared to uniform shot allocation\n`;
+      md += `- **Optimal Neyman Shot Distribution:** $[N_{ab}, N_{ab'}, N_{a'b}, N_{a'b'}] = [${summary.neymanAllocations.join(', ')}]$\n\n`;
+    }
 
     md += `## 5. Depolarizing Noise Sweep & Transition Thresholds\n\n`;
     md += `| Depolarizing Noise $p$ | Horodecki $S_{\\max}$ | Fixed-Angle $S$ | Classical Bound | Entangled? | Bell Nonlocal? |\n`;
@@ -72,22 +73,16 @@ export class ReportGenerator {
     md += `2. On NISQ hardware, asymmetric readout and phase damping degrade the observable witness. NA-UAO recovers optimal measurement frames and minimizes variance through Neyman-optimal shot allocation.\n`;
     md += `3. Generated OpenQASM 2.0/3.0 circuits and Python Qiskit adapters are ready for execution on accessible cloud QPUs (e.g. IBM Quantum).\n`;
 
-    if (outputPath) {
-      fs.writeFileSync(outputPath, md, 'utf-8');
-    }
     return md;
   }
 
   /**
    * Exports sweep data to CSV format.
    */
-  static exportSweepCSV(sweepData, outputPath) {
+  static exportSweepCSV(sweepData) {
     let csv = `depolarizing_p,horodecki_s_max,fixed_angle_s,classical_bound,tsirelson_bound,is_entangled,is_bell_nonlocal\n`;
     for (const row of sweepData) {
       csv += `${row.depolarizingP.toFixed(4)},${row.theoreticalMaxS.toFixed(4)},${row.fixedAngleS.toFixed(4)},${row.classicalBound},${row.tsirelsonBound.toFixed(4)},${row.isEntangled},${row.isBellNonlocal}\n`;
-    }
-    if (outputPath) {
-      fs.writeFileSync(outputPath, csv, 'utf-8');
     }
     return csv;
   }

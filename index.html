@@ -1,212 +1,1266 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quantum Bell Inequality & Entanglement Research Platform</title>
   <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
   <style>
-    input[type=range] { accent-color: var(--primary, #3b82f6); }
+    :root {
+      --bg: #090d16;
+      --card-bg: #111827;
+      --card-border: #1f293d;
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --primary: #3b82f6;
+      --accent: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+    }
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    input[type=range] {
+      accent-color: #3b82f6;
+    }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+    .glass-card {
+      background: rgba(17, 24, 39, 0.7);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--card-border);
+    }
+    .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #374151; border-radius: 3px; }
   </style>
 </head>
-<body class="bg-transparent text-[var(--foreground)] antialiased p-0 m-0 text-xs select-none">
-  <div class="py-2 space-y-3 max-w-full">
-    <!-- Header Readout -->
-    <div class="flex items-center justify-between pb-2 border-b border-[var(--card-border)]">
-      <div class="flex items-center gap-2">
-        <span class="font-bold tracking-tight text-sm">CHSH Quantum Witness</span>
-        <span id="violationBadge" class="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/15 text-emerald-500 border border-emerald-500/30">
-          Quantum Nonlocal
-        </span>
+<body class="min-h-screen flex flex-col antialiased">
+
+  <!-- Navigation Bar -->
+  <header class="border-b border-gray-800 bg-gray-900/60 sticky top-0 z-50 backdrop-blur-md px-4 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-lg bg-blue-600/20 border border-blue-500/40 flex items-center justify-center text-blue-400 font-bold text-lg">
+        Ψ
       </div>
-      <div class="flex items-baseline gap-1 font-mono">
-        <span class="text-xs text-[var(--muted-foreground)]">S =</span>
-        <span id="sVal" class="text-base font-bold text-[var(--primary)] tabular-nums">2.8284</span>
-        <span class="text-[10px] text-[var(--muted-foreground)]">/ 2.8284</span>
+      <div>
+        <h1 class="font-bold text-sm tracking-tight text-white flex items-center gap-2">
+          Quantum Bell Platform
+          <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+            v1.0.0
+          </span>
+        </h1>
+        <p class="text-[11px] text-gray-400">Computational & Experimental Nonlocality Platform</p>
       </div>
     </div>
 
-    <!-- Interactive Sliders Grid -->
-    <div class="grid grid-cols-2 gap-3">
-      <!-- Alice Angles -->
-      <div class="space-y-1.5 p-2 rounded bg-[var(--card)] border border-[var(--card-border)]">
-        <div class="font-semibold text-[11px] text-[var(--muted-foreground)] flex justify-between">
-          <span>Alice Settings</span>
-          <span class="font-mono text-[10px]">Basis A, A'</span>
-        </div>
-        <div class="space-y-1">
-          <div class="flex justify-between items-center text-[11px]">
-            <label for="angA">Angle a</label>
-            <span id="lblA" class="font-mono tabular-nums text-[var(--foreground)]">0°</span>
+    <!-- Navigation Tabs -->
+    <nav class="flex items-center gap-1 bg-gray-800/60 p-1 rounded-lg border border-gray-700/50 text-xs">
+      <button onclick="switchTab('simulator')" id="tab-simulator" class="tab-btn px-3 py-1.5 rounded-md font-medium text-white bg-blue-600 transition-all">
+        Simulator
+      </button>
+      <button onclick="switchTab('classical')" id="tab-classical" class="tab-btn px-3 py-1.5 rounded-md font-medium text-gray-400 hover:text-white transition-all">
+        Classical LHV
+      </button>
+      <button onclick="switchTab('optimizer')" id="tab-optimizer" class="tab-btn px-3 py-1.5 rounded-md font-medium text-gray-400 hover:text-white transition-all">
+        7 Optimizers
+      </button>
+      <button onclick="switchTab('sweep')" id="tab-sweep" class="tab-btn px-3 py-1.5 rounded-md font-medium text-gray-400 hover:text-white transition-all">
+        Noise Sweep
+      </button>
+      <button onclick="switchTab('circuit')" id="tab-circuit" class="tab-btn px-3 py-1.5 rounded-md font-medium text-gray-400 hover:text-white transition-all">
+        OpenQASM & Report
+      </button>
+    </nav>
+
+    <!-- Backend Status Indicator -->
+    <div class="flex items-center gap-2 text-xs">
+      <span id="backendPing" class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+      <span id="backendStatusText" class="text-gray-400 font-mono text-[11px]">Connecting...</span>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 space-y-6">
+
+    <!-- TAB 1: CHSH SIMULATOR -->
+    <div id="view-simulator" class="tab-view space-y-6">
+      <!-- Top Metrics Dashboard -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <!-- CHSH S-Parameter Metric Card -->
+        <div class="glass-card rounded-xl p-4 flex flex-col justify-between">
+          <div class="flex justify-between items-start">
+            <span class="text-xs uppercase tracking-wider text-gray-400 font-medium">CHSH Parameter (S)</span>
+            <span id="simBadge" class="text-[10px] font-mono px-2 py-0.5 rounded font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+              NONLOCAL
+            </span>
           </div>
-          <input id="angA" type="range" min="-180" max="180" value="0" class="w-full h-1.5 bg-zinc-700/30 rounded cursor-pointer" />
-        </div>
-        <div class="space-y-1">
-          <div class="flex justify-between items-center text-[11px]">
-            <label for="angAPrime">Angle a'</label>
-            <span id="lblAPrime" class="font-mono tabular-nums text-[var(--foreground)]">90°</span>
+          <div class="my-2">
+            <div class="text-3xl font-extrabold mono text-blue-400 tracking-tight" id="dispS">
+              2.8284
+            </div>
+            <div class="text-xs text-gray-400 mono mt-0.5" id="dispStdErr">
+              &plusmn; 0.0000 (Analytical)
+            </div>
           </div>
-          <input id="angAPrime" type="range" min="-180" max="180" value="90" class="w-full h-1.5 bg-zinc-700/30 rounded cursor-pointer" />
+          <!-- Real-time Meter -->
+          <div class="space-y-1">
+            <div class="flex justify-between text-[10px] text-gray-400 mono">
+              <span>LHV: 2.0</span>
+              <span>Tsirelson: 2.8284</span>
+            </div>
+            <div class="h-2 w-full bg-gray-800 rounded-full overflow-hidden relative">
+              <div class="absolute left-[70.7%] top-0 bottom-0 w-0.5 bg-yellow-500 z-10" title="Classical Limit (2.0)"></div>
+              <div id="sMeterFill" class="h-full bg-gradient-to-r from-blue-500 via-emerald-400 to-indigo-500" style="width: 100%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Statistical Significance -->
+        <div class="glass-card rounded-xl p-4 flex flex-col justify-between">
+          <div class="flex justify-between items-start">
+            <span class="text-xs uppercase tracking-wider text-gray-400 font-medium">Statistical Significance</span>
+            <span id="fiveSigmaBadge" class="text-[10px] font-mono px-2 py-0.5 rounded font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/30">
+              5&sigma; Discovery
+            </span>
+          </div>
+          <div class="my-2">
+            <div class="text-3xl font-extrabold mono text-emerald-400 tracking-tight" id="dispZScore">
+              &infin;
+            </div>
+            <div class="text-xs text-gray-400 mono mt-0.5" id="dispPValue">
+              p-value: &lt; 10&minus;15
+            </div>
+          </div>
+          <div class="text-[11px] text-gray-400" id="dispCI">
+            95% CI: [2.8284, 2.8284]
+          </div>
+        </div>
+
+        <!-- Horodecki Analytical Maximum -->
+        <div class="glass-card rounded-xl p-4 flex flex-col justify-between">
+          <div class="flex justify-between items-start">
+            <span class="text-xs uppercase tracking-wider text-gray-400 font-medium">Horodecki S_max</span>
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-gray-800 text-gray-300">
+              T^T*T Theorem
+            </span>
+          </div>
+          <div class="my-2">
+            <div class="text-3xl font-extrabold mono text-purple-400 tracking-tight" id="dispHMax">
+              2.8284
+            </div>
+            <div class="text-xs text-gray-400 mono mt-0.5" id="dispHoroEigen">
+              u1+u2: 2.0000 &gt; 1.0
+            </div>
+          </div>
+          <div class="text-[11px] text-gray-400">
+            Closed-form theoretical ceiling
+          </div>
+        </div>
+
+        <!-- Entanglement Measures -->
+        <div class="glass-card rounded-xl p-4 flex flex-col justify-between">
+          <div class="flex justify-between items-start">
+            <span class="text-xs uppercase tracking-wider text-gray-400 font-medium">Entanglement</span>
+            <span id="entangleBadge" class="text-[10px] font-mono px-2 py-0.5 rounded font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+              ENTANGLED
+            </span>
+          </div>
+          <div class="my-2">
+            <div class="text-3xl font-extrabold mono text-cyan-400 tracking-tight" id="dispNegativity">
+              0.5000
+            </div>
+            <div class="text-xs text-gray-400 mono mt-0.5" id="dispLogNeg">
+              Log Negativity: 1.000
+            </div>
+          </div>
+          <div class="text-[11px] text-gray-400">
+            Peres-Horodecki (PPT) Negativity
+          </div>
         </div>
       </div>
 
-      <!-- Bob Angles -->
-      <div class="space-y-1.5 p-2 rounded bg-[var(--card)] border border-[var(--card-border)]">
-        <div class="font-semibold text-[11px] text-[var(--muted-foreground)] flex justify-between">
-          <span>Bob Settings</span>
-          <span class="font-mono text-[10px]">Basis B, B'</span>
-        </div>
-        <div class="space-y-1">
-          <div class="flex justify-between items-center text-[11px]">
-            <label for="angB">Angle b</label>
-            <span id="lblB" class="font-mono tabular-nums text-[var(--foreground)]">45°</span>
+      <!-- Controls & Experiment Setup Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Column 1: State & Noise Configuration -->
+        <div class="glass-card rounded-xl p-5 space-y-4">
+          <h2 class="text-sm font-semibold tracking-wide text-white border-b border-gray-800 pb-2 flex items-center justify-between">
+            <span>1. State & Noise Model</span>
+            <span class="text-[10px] text-blue-400 font-mono">ρ (density matrix)</span>
+          </h2>
+
+          <!-- State Selection -->
+          <div class="space-y-1">
+            <label class="text-xs text-gray-300">Quantum State Preparation</label>
+            <select id="stateType" onchange="runEvaluation()" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
+              <option value="phiPlus">Bell State |Φ+⟩ = (|00⟩ + |11⟩)/√2</option>
+              <option value="phiMinus">Bell State |Φ-⟩ = (|00⟩ - |11⟩)/√2</option>
+              <option value="psiPlus">Bell State |Ψ+⟩ = (|01⟩ + |10⟩)/√2</option>
+              <option value="psiMinus">Bell State |Ψ-⟩ = (|01⟩ - |10⟩)/√2</option>
+              <option value="werner">Werner Mixed State ρ_W(p)</option>
+              <option value="generalized">Generalized State cos(α)|00⟩ + e^(iφ)sin(α)|11⟩</option>
+            </select>
           </div>
-          <input id="angB" type="range" min="-180" max="180" value="45" class="w-full h-1.5 bg-zinc-700/30 rounded cursor-pointer" />
-        </div>
-        <div class="space-y-1">
-          <div class="flex justify-between items-center text-[11px]">
-            <label for="angBPrime">Angle b'</label>
-            <span id="lblBPrime" class="font-mono tabular-nums text-[var(--foreground)]">-45°</span>
+
+          <!-- Generalized Alpha/Phi (shown only if generalized) -->
+          <div id="genStateControls" class="space-y-2 hidden p-3 rounded-lg bg-gray-800/40 border border-gray-700/50">
+            <div class="space-y-1">
+              <div class="flex justify-between text-xs">
+                <span class="text-gray-400">Entanglement Angle (α)</span>
+                <span id="lblAlpha" class="mono text-white">45.0°</span>
+              </div>
+              <input id="inputAlpha" type="range" min="0" max="90" value="45" oninput="runEvaluation()" class="w-full" />
+            </div>
+            <div class="space-y-1">
+              <div class="flex justify-between text-xs">
+                <span class="text-gray-400">Relative Phase (φ)</span>
+                <span id="lblPhi" class="mono text-white">0.0°</span>
+              </div>
+              <input id="inputPhi" type="range" min="0" max="360" value="0" oninput="runEvaluation()" class="w-full" />
+            </div>
           </div>
-          <input id="angBPrime" type="range" min="-180" max="180" value="-45" class="w-full h-1.5 bg-zinc-700/30 rounded cursor-pointer" />
+
+          <!-- Noise Sliders -->
+          <div class="space-y-3 pt-2">
+            <div class="space-y-1">
+              <div class="flex justify-between text-xs">
+                <span class="text-gray-300">Global Depolarizing Noise (p)</span>
+                <span id="lblDepol" class="mono text-blue-400">0.0%</span>
+              </div>
+              <input id="noiseDepol" type="range" min="0" max="80" value="0" step="0.5" oninput="runEvaluation()" class="w-full" />
+              <div class="flex justify-between text-[10px] text-gray-500 font-mono">
+                <span>0%</span>
+                <span class="text-yellow-500">Crit: 29.3%</span>
+                <span class="text-red-400">Ent: 66.7%</span>
+                <span>80%</span>
+              </div>
+            </div>
+
+            <div class="space-y-1">
+              <div class="flex justify-between text-xs">
+                <span class="text-gray-300">Amplitude Damping (T1 Decay γ)</span>
+                <span id="lblGamma" class="mono text-blue-400">0.0%</span>
+              </div>
+              <input id="noiseGamma" type="range" min="0" max="50" value="0" step="0.5" oninput="runEvaluation()" class="w-full" />
+            </div>
+
+            <div class="space-y-1">
+              <div class="flex justify-between text-xs">
+                <span class="text-gray-300">Phase Damping (T2* Dephasing λ)</span>
+                <span id="lblLambda" class="mono text-blue-400">0.0%</span>
+              </div>
+              <input id="noiseLambda" type="range" min="0" max="50" value="0" step="0.5" oninput="runEvaluation()" class="w-full" />
+            </div>
+
+            <div class="space-y-1">
+              <div class="flex justify-between text-xs">
+                <span class="text-gray-300">Readout Measurement Error (η)</span>
+                <span id="lblReadout" class="mono text-blue-400">0.0%</span>
+              </div>
+              <input id="noiseReadout" type="range" min="0" max="20" value="0" step="0.2" oninput="runEvaluation()" class="w-full" />
+            </div>
+          </div>
+
+          <!-- Preset Hardware Profile Buttons -->
+          <div class="pt-2 border-t border-gray-800 space-y-1.5">
+            <span class="text-[11px] text-gray-400 font-medium">Quick Hardware Presets</span>
+            <div class="grid grid-cols-3 gap-2">
+              <button onclick="applyPreset('ideal')" class="px-2 py-1.5 rounded bg-gray-800 hover:bg-gray-700 text-[11px] text-gray-300 border border-gray-700 transition-colors">
+                Ideal
+              </button>
+              <button onclick="applyPreset('eagle')" class="px-2 py-1.5 rounded bg-gray-800 hover:bg-gray-700 text-[11px] text-blue-300 border border-blue-900/50 transition-colors">
+                IBM Eagle
+              </button>
+              <button onclick="applyPreset('noisy')" class="px-2 py-1.5 rounded bg-gray-800 hover:bg-gray-700 text-[11px] text-yellow-300 border border-yellow-900/50 transition-colors">
+                Noisy NISQ
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Column 2: Measurement Angles -->
+        <div class="glass-card rounded-xl p-5 space-y-4">
+          <div class="flex items-center justify-between border-b border-gray-800 pb-2">
+            <h2 class="text-sm font-semibold tracking-wide text-white">2. Measurement Settings</h2>
+            <div class="flex gap-1">
+              <button onclick="applyAnglePreset('bell')" class="px-2 py-0.5 rounded bg-blue-600/20 text-blue-400 text-[10px] hover:bg-blue-600/30 border border-blue-500/30">
+                Optimal
+              </button>
+              <button onclick="applyAnglePreset('align')" class="px-2 py-0.5 rounded bg-gray-800 text-gray-300 text-[10px] hover:bg-gray-700 border border-gray-700">
+                Aligned
+              </button>
+            </div>
+          </div>
+
+          <!-- Alice Angles -->
+          <div class="space-y-3 p-3 rounded-lg bg-gray-800/30 border border-gray-800">
+            <span class="text-xs font-semibold text-gray-300 uppercase tracking-wide">Alice (Observer A)</span>
+            <div class="space-y-1">
+              <div class="flex justify-between text-xs">
+                <span class="text-gray-400">Setting a (θa)</span>
+                <span id="lblThetaA" class="mono text-white font-medium">0.0°</span>
+              </div>
+              <input id="thetaA" type="range" min="-180" max="180" value="0" oninput="runEvaluation()" class="w-full" />
+            </div>
+            <div class="space-y-1">
+              <div class="flex justify-between text-xs">
+                <span class="text-gray-400">Setting a' (θa')</span>
+                <span id="lblThetaAPrime" class="mono text-white font-medium">90.0°</span>
+              </div>
+              <input id="thetaAPrime" type="range" min="-180" max="180" value="90" oninput="runEvaluation()" class="w-full" />
+            </div>
+          </div>
+
+          <!-- Bob Angles -->
+          <div class="space-y-3 p-3 rounded-lg bg-gray-800/30 border border-gray-800">
+            <span class="text-xs font-semibold text-gray-300 uppercase tracking-wide">Bob (Observer B)</span>
+            <div class="space-y-1">
+              <div class="flex justify-between text-xs">
+                <span class="text-gray-400">Setting b (θb)</span>
+                <span id="lblThetaB" class="mono text-white font-medium">45.0°</span>
+              </div>
+              <input id="thetaB" type="range" min="-180" max="180" value="45" oninput="runEvaluation()" class="w-full" />
+            </div>
+            <div class="space-y-1">
+              <div class="flex justify-between text-xs">
+                <span class="text-gray-400">Setting b' (θb')</span>
+                <span id="lblThetaBPrime" class="mono text-white font-medium">-45.0°</span>
+              </div>
+              <input id="thetaBPrime" type="range" min="-180" max="180" value="-45" oninput="runEvaluation()" class="w-full" />
+            </div>
+          </div>
+
+          <!-- Bloch Sphere Compass SVG Visualization -->
+          <div class="p-3 rounded-lg bg-gray-900 border border-gray-800 flex flex-col items-center justify-center">
+            <span class="text-[11px] text-gray-400 mb-2 font-mono">Measurement Angle Vectors</span>
+            <svg id="blochCompass" width="180" height="180" viewBox="-90 -90 180 180">
+              <circle cx="0" cy="0" r="75" fill="none" stroke="#374151" stroke-width="1.5" stroke-dasharray="3,3" />
+              <line x1="-80" y1="0" x2="80" y2="0" stroke="#1f2937" stroke-width="1" />
+              <line x1="0" y1="-80" x2="0" y2="80" stroke="#1f2937" stroke-width="1" />
+              <!-- Vectors -->
+              <line id="vecA" x1="0" y1="0" x2="0" y2="-70" stroke="#3b82f6" stroke-width="2.5" />
+              <line id="vecAP" x1="0" y1="0" x2="70" y2="0" stroke="#60a5fa" stroke-width="2" stroke-dasharray="4,2" />
+              <line id="vecB" x1="0" y1="0" x2="49" y2="-49" stroke="#10b981" stroke-width="2.5" />
+              <line id="vecBP" x1="0" y1="0" x2="-49" y2="-49" stroke="#34d399" stroke-width="2" stroke-dasharray="4,2" />
+              <circle cx="0" cy="0" r="3" fill="#9ca3af" />
+            </svg>
+            <div class="flex gap-4 text-[10px] mono mt-1">
+              <span class="text-blue-400">■ a</span>
+              <span class="text-blue-300">□ a'</span>
+              <span class="text-emerald-400">■ b</span>
+              <span class="text-emerald-300">□ b'</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Column 3: Finite Shots & Correlator Breakdown -->
+        <div class="glass-card rounded-xl p-5 space-y-4 flex flex-col justify-between">
+          <div class="space-y-4">
+            <h2 class="text-sm font-semibold tracking-wide text-white border-b border-gray-800 pb-2">
+              3. Measurement Sampling
+            </h2>
+
+            <div class="space-y-1">
+              <label class="text-xs text-gray-300">Shot Budget (Monte Carlo Sampling)</label>
+              <select id="shotsSelector" onchange="runEvaluation()" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
+                <option value="0">Analytical (Infinite Shots, σ = 0)</option>
+                <option value="1024">1,024 Shots (256 / setting)</option>
+                <option value="2048">2,048 Shots (512 / setting)</option>
+                <option value="4096" selected>4,096 Shots (1,024 / setting)</option>
+                <option value="8192">8,192 Shots (2,048 / setting)</option>
+                <option value="16384">16,384 Shots (4,096 / setting)</option>
+              </select>
+            </div>
+
+            <!-- Correlator Breakdown List -->
+            <div class="space-y-2 pt-2">
+              <span class="text-xs font-semibold text-gray-300">Correlator Components: E(x, y)</span>
+
+              <div class="p-2.5 rounded-lg bg-gray-800/40 border border-gray-800 space-y-1">
+                <div class="flex justify-between text-xs mono">
+                  <span class="text-gray-300">+ E(a, b)</span>
+                  <span id="corrAB" class="text-blue-400 font-bold">+0.7071</span>
+                </div>
+                <div class="h-1.5 w-full bg-gray-800 rounded-full overflow-hidden flex">
+                  <div id="barAB" class="bg-blue-500 h-full" style="width: 85%;"></div>
+                </div>
+              </div>
+
+              <div class="p-2.5 rounded-lg bg-gray-800/40 border border-gray-800 space-y-1">
+                <div class="flex justify-between text-xs mono">
+                  <span class="text-gray-300">+ E(a, b')</span>
+                  <span id="corrABPrime" class="text-blue-400 font-bold">+0.7071</span>
+                </div>
+                <div class="h-1.5 w-full bg-gray-800 rounded-full overflow-hidden flex">
+                  <div id="barABPrime" class="bg-blue-500 h-full" style="width: 85%;"></div>
+                </div>
+              </div>
+
+              <div class="p-2.5 rounded-lg bg-gray-800/40 border border-gray-800 space-y-1">
+                <div class="flex justify-between text-xs mono">
+                  <span class="text-gray-300">+ E(a', b)</span>
+                  <span id="corrAPrimeB" class="text-blue-400 font-bold">+0.7071</span>
+                </div>
+                <div class="h-1.5 w-full bg-gray-800 rounded-full overflow-hidden flex">
+                  <div id="barAPrimeB" class="bg-blue-500 h-full" style="width: 85%;"></div>
+                </div>
+              </div>
+
+              <div class="p-2.5 rounded-lg bg-gray-800/40 border border-gray-800 space-y-1">
+                <div class="flex justify-between text-xs mono">
+                  <span class="text-gray-300">&minus; E(a', b')</span>
+                  <span id="corrAPrimeBPrime" class="text-red-400 font-bold">&minus;0.7071</span>
+                </div>
+                <div class="h-1.5 w-full bg-gray-800 rounded-full overflow-hidden flex">
+                  <div id="barAPrimeBPrime" class="bg-red-500 h-full" style="width: 85%;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button onclick="runEvaluation()" class="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium text-xs transition-all shadow-lg shadow-blue-600/20 active:scale-[0.99] flex items-center justify-center gap-2">
+            <span>Re-Sample Experiment</span>
+            <span class="mono text-[10px] opacity-75">▶</span>
+          </button>
         </div>
       </div>
     </div>
 
-    <!-- Depolarizing Noise Slider & Correlator Readouts -->
-    <div class="p-2 rounded bg-[var(--card)] border border-[var(--card-border)] space-y-2">
-      <div class="flex justify-between items-center">
-        <span class="font-semibold text-[11px]">Global Depolarizing Noise (p)</span>
-        <span id="lblNoise" class="font-mono text-[11px] text-[var(--primary)] font-bold">0.0%</span>
-      </div>
-      <input id="noiseP" type="range" min="0" max="100" value="0" step="0.5" class="w-full h-1.5 bg-zinc-700/30 rounded cursor-pointer" />
-
-      <!-- Progress Meter for Bounds -->
-      <div class="pt-1 space-y-1">
-        <div class="flex justify-between text-[10px] text-[var(--muted-foreground)] font-mono">
-          <span>Classical: 2.0</span>
-          <span>Crit Noise: 29.3%</span>
-          <span>Entangle: 66.7%</span>
-          <span>Tsirelson: 2.828</span>
+    <!-- TAB 2: CLASSICAL LOCAL HIDDEN VARIABLE (LHV) SIMULATION -->
+    <div id="view-classical" class="tab-view hidden space-y-6">
+      <div class="glass-card rounded-xl p-6 space-y-4">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-800 pb-4">
+          <div>
+            <h2 class="text-lg font-bold text-white flex items-center gap-2">
+              Classical Local Hidden Variable (LHV) Simulation
+              <span class="text-xs px-2 py-0.5 rounded bg-yellow-500/10 text-yellow-400 border border-yellow-500/30">
+                Bell's Theorem Proof
+              </span>
+            </h2>
+            <p class="text-xs text-gray-400 mt-1">
+              Simulates shared hidden variables λ ~ Uniform[0, 2π) to prove that local realism strictly enforces |S_LHV| ≤ 2.000.
+            </p>
+          </div>
+          <div class="flex items-center gap-3">
+            <select id="lhvTrials" class="bg-gray-800 border border-gray-700 text-xs text-white rounded-lg px-3 py-2">
+              <option value="10000">10,000 Particle Pairs</option>
+              <option value="50000">50,000 Particle Pairs</option>
+              <option value="100000" selected>100,000 Particle Pairs</option>
+            </select>
+            <button onclick="runLHVSimulation()" id="btnRunLHV" class="px-4 py-2 rounded-lg bg-amber-600 hover:bg-amber-500 text-white text-xs font-semibold shadow-lg shadow-amber-600/20 transition-all flex items-center gap-1.5">
+              <span>Execute 100k Trials</span>
+            </button>
+          </div>
         </div>
-        <div class="relative w-full h-2 rounded-full bg-zinc-800/40 overflow-hidden border border-[var(--card-border)]">
-          <div class="absolute top-0 bottom-0 left-[70.7%] w-0.5 bg-amber-500/80 z-10" title="Classical Limit (2.0 / 2.8284)"></div>
-          <div id="meterFill" class="h-full bg-gradient-to-r from-emerald-500 via-teal-400 to-indigo-500 transition-all duration-75" style="width: 100%;"></div>
+
+        <!-- LHV Results Card -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+          <div class="p-4 rounded-lg bg-gray-800/40 border border-gray-800">
+            <span class="text-xs text-gray-400 uppercase font-medium">Measured Classical S</span>
+            <div class="text-3xl font-extrabold mono text-amber-400 mt-1" id="lhvMeasuredS">
+              1.9877
+            </div>
+            <div class="text-xs text-gray-400 mono mt-1" id="lhvStdErr">
+              &plusmn; 0.0110
+            </div>
+          </div>
+
+          <div class="p-4 rounded-lg bg-gray-800/40 border border-gray-800">
+            <span class="text-xs text-gray-400 uppercase font-medium">Theoretical Classical Bound</span>
+            <div class="text-3xl font-extrabold mono text-gray-300 mt-1">
+              2.0000
+            </div>
+            <div class="text-xs text-emerald-400 mono mt-1">
+              Strict Mathematical Upper Limit
+            </div>
+          </div>
+
+          <div class="p-4 rounded-lg bg-gray-800/40 border border-gray-800">
+            <span class="text-xs text-gray-400 uppercase font-medium">Quantum Advantage</span>
+            <div class="text-3xl font-extrabold mono text-blue-400 mt-1">
+              +41.42%
+            </div>
+            <div class="text-xs text-gray-400 mono mt-1">
+              Tsirelson Bound: 2.8284
+            </div>
+          </div>
+        </div>
+
+        <!-- Correlator Breakdown for LHV -->
+        <div class="space-y-2 pt-2">
+          <span class="text-xs font-semibold text-gray-300">LHV Correlators vs Expected Classical Values:</span>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs mono">
+            <div class="p-3 rounded-lg bg-gray-900 border border-gray-800">
+              <span class="text-gray-400">E(a, b):</span>
+              <div class="text-base text-white font-bold" id="lhvEAB">0.5042</div>
+              <span class="text-[10px] text-gray-500">Exp: 0.5000</span>
+            </div>
+            <div class="p-3 rounded-lg bg-gray-900 border border-gray-800">
+              <span class="text-gray-400">E(a, b'):</span>
+              <div class="text-base text-white font-bold" id="lhvEABp">0.4981</div>
+              <span class="text-[10px] text-gray-500">Exp: 0.5000</span>
+            </div>
+            <div class="p-3 rounded-lg bg-gray-900 border border-gray-800">
+              <span class="text-gray-400">E(a', b):</span>
+              <div class="text-base text-white font-bold" id="lhvEApB">0.4936</div>
+              <span class="text-[10px] text-gray-500">Exp: 0.5000</span>
+            </div>
+            <div class="p-3 rounded-lg bg-gray-900 border border-gray-800">
+              <span class="text-gray-400">E(a', b'):</span>
+              <div class="text-base text-red-400 font-bold" id="lhvEApBp">-0.4918</div>
+              <span class="text-[10px] text-gray-500">Exp: -0.5000</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-3 rounded-lg bg-blue-900/20 border border-blue-800/40 text-xs text-blue-300">
+          <strong>Key Physical Conclusion:</strong> No local hidden variable model can generate S &gt; 2.000. When physical quantum experiments measure S &approx; 2.828, they decisively rule out local realism without faster-than-light communication.
         </div>
       </div>
     </div>
 
-    <!-- Correlators & Preset Buttons -->
-    <div class="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-[var(--card-border)]">
-      <div class="flex items-center gap-2 font-mono text-[10px]">
-        <span class="text-[var(--muted-foreground)]">E(a,b): <b id="eAB" class="text-[var(--foreground)]">+0.707</b></span>
-        <span class="text-[var(--muted-foreground)]">E(a,b'): <b id="eABp" class="text-[var(--foreground)]">+0.707</b></span>
-        <span class="text-[var(--muted-foreground)]">E(a',b): <b id="eApB" class="text-[var(--foreground)]">+0.707</b></span>
-        <span class="text-[var(--muted-foreground)]">E(a',b'): <b id="eApBp" class="text-[var(--foreground)]">-0.707</b></span>
-      </div>
+    <!-- TAB 3: 7 OPTIMIZATION ALGORITHMS BENCHMARK -->
+    <div id="view-optimizer" class="tab-view hidden space-y-6">
+      <div class="glass-card rounded-xl p-6 space-y-4">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-800 pb-4">
+          <div>
+            <h2 class="text-lg font-bold text-white flex items-center gap-2">
+              Optimization Suite: 7 Algorithms Comparison
+              <span class="text-xs px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/30">
+                Resource Efficiency
+              </span>
+            </h2>
+            <p class="text-xs text-gray-400 mt-1">
+              Evaluates analytical, stochastic, population, Bayesian, and our novel **NA-UAO (Neyman Adaptive)** algorithms on noisy NISQ hardware.
+            </p>
+          </div>
+          <button onclick="runBenchmarksSuite()" id="btnRunBench" class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-lg shadow-blue-600/20 transition-all flex items-center gap-1.5">
+            <span>Run All 7 Benchmarks</span>
+          </button>
+        </div>
 
-      <div class="flex items-center gap-1">
-        <button id="btnOptimal" class="px-2 py-1 rounded bg-[var(--card)] hover:bg-[var(--card-border)] border border-[var(--card-border)] text-[10px] transition-colors">
-          Optimal Bell
-        </button>
-        <button id="btnCritNoise" class="px-2 py-1 rounded bg-[var(--card)] hover:bg-[var(--card-border)] border border-[var(--card-border)] text-[10px] transition-colors">
-          p = 29.3%
-        </button>
-        <button id="btnMaxEnt" class="px-2 py-1 rounded bg-[var(--card)] hover:bg-[var(--card-border)] border border-[var(--card-border)] text-[10px] transition-colors">
-          p = 66.7%
-        </button>
+        <!-- Table of 7 Algorithms -->
+        <div class="overflow-x-auto custom-scroll">
+          <table class="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr class="border-b border-gray-800 text-gray-400 font-mono text-[11px]">
+                <th class="py-2 px-3">Algorithm</th>
+                <th class="py-2 px-3">Measured S</th>
+                <th class="py-2 px-3">Std Error</th>
+                <th class="py-2 px-3">Z-Score (σ)</th>
+                <th class="py-2 px-3">Evaluations / Shots</th>
+                <th class="py-2 px-3">Methodology</th>
+              </tr>
+            </thead>
+            <tbody id="benchTableBody" class="divide-y divide-gray-800/60 font-mono">
+              <tr><td colspan="6" class="py-6 text-center text-gray-500">Click "Run All 7 Benchmarks" to execute live comparison...</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Dynamic Chart Comparison -->
+        <div class="pt-4 border-t border-gray-800 space-y-2">
+          <span class="text-xs font-semibold text-gray-300">Benchmark Performance Visualizer:</span>
+          <div id="benchChartContainer" class="w-full h-48 bg-gray-950 rounded-lg border border-gray-800 p-2 flex items-end justify-around gap-2">
+            <!-- Bars injected dynamically -->
+          </div>
+        </div>
+
+        <!-- Novelty Highlights Card -->
+        <div id="nauaoHighlights" class="hidden p-4 rounded-lg bg-emerald-950/20 border border-emerald-800/40 text-xs text-emerald-300 space-y-1">
+          <span class="font-bold text-emerald-400 flex items-center gap-1">★ Research Novelty: Noise-Adaptive & Uncertainty-Aware Optimizer (NA-UAO)</span>
+          <p id="nauaoSummaryText">Neyman dynamic shot allocation optimizes variance, concentrating shots where quantum measurement uncertainty is highest.</p>
+        </div>
       </div>
     </div>
-  </div>
 
+    <!-- TAB 4: NOISE PARAMETER SWEEP -->
+    <div id="view-sweep" class="tab-view hidden space-y-6">
+      <div class="glass-card rounded-xl p-6 space-y-4">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-800 pb-4">
+          <div>
+            <h2 class="text-lg font-bold text-white flex items-center gap-2">
+              Depolarizing Noise Sweep & Phase Transitions
+            </h2>
+            <p class="text-xs text-gray-400 mt-1">
+              Visualizes the exact transition thresholds: Bell Nonlocality (p = 29.289%) vs Quantum Entanglement (p = 66.667%).
+            </p>
+          </div>
+          <button onclick="runParameterSweep()" id="btnRunSweep" class="px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold shadow-lg shadow-purple-600/20 transition-all">
+            Execute Noise Sweep
+          </button>
+        </div>
+
+        <!-- SVG Line Chart Canvas -->
+        <div class="space-y-2">
+          <div class="flex justify-between items-center text-xs">
+            <span class="text-gray-300 font-medium">CHSH Violation S vs Depolarizing Noise (p)</span>
+            <div class="flex items-center gap-4 text-[11px] mono">
+              <span class="text-purple-400">■ Horodecki S_max</span>
+              <span class="text-blue-400">■ Fixed-Angle S</span>
+              <span class="text-yellow-400 border-b border-dashed border-yellow-400">-- Classical Bound (2.0)</span>
+            </div>
+          </div>
+
+          <div class="w-full bg-gray-950 border border-gray-800 rounded-lg p-3 overflow-hidden">
+            <svg id="sweepSvg" width="100%" height="240" viewBox="0 0 600 240" class="overflow-visible">
+              <!-- Grid lines & labels dynamically injected -->
+              <text x="300" y="120" text-anchor="middle" fill="#6b7280" font-size="12">Click "Execute Noise Sweep" to plot dynamic curve...</text>
+            </svg>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs pt-2">
+          <div class="p-3 rounded-lg bg-gray-800/40 border border-gray-800 space-y-1">
+            <span class="font-bold text-yellow-400">Critical Nonlocality Bound (p = 29.289%):</span>
+            <p class="text-gray-300">
+              When depolarizing noise exceeds 1 &minus; 1/√2, CHSH violation is destroyed (S &le; 2.0).
+            </p>
+          </div>
+          <div class="p-3 rounded-lg bg-gray-800/40 border border-gray-800 space-y-1">
+            <span class="font-bold text-red-400">Critical Entanglement Bound (p = 66.667%):</span>
+            <p class="text-gray-300">
+              Concurrence persists up to p = 2/3. Between 29.3% and 66.7%, states are genuinely entangled yet Bell-local.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 5: OPENQASM CIRCUITS & REPORT -->
+    <div id="view-circuit" class="tab-view hidden space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- OpenQASM Code Viewer -->
+        <div class="glass-card rounded-xl p-5 space-y-4">
+          <div class="flex items-center justify-between border-b border-gray-800 pb-2">
+            <h2 class="text-sm font-semibold tracking-wide text-white">Generated OpenQASM Circuit</h2>
+            <div class="flex items-center gap-2">
+              <button onclick="copyQASM()" class="px-2.5 py-1 rounded bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs border border-gray-700">
+                Copy Code
+              </button>
+            </div>
+          </div>
+          <textarea id="qasmOutput" readonly class="w-full h-80 bg-gray-950 border border-gray-800 rounded-lg p-3 font-mono text-xs text-blue-300 leading-relaxed custom-scroll focus:outline-none resize-none"></textarea>
+        </div>
+
+        <!-- Research Report Generator -->
+        <div class="glass-card rounded-xl p-5 space-y-4 flex flex-col justify-between">
+          <div class="space-y-4">
+            <div class="flex items-center justify-between border-b border-gray-800 pb-2">
+              <h2 class="text-sm font-semibold tracking-wide text-white">Automated Research Report</h2>
+              <button onclick="downloadReport()" class="px-2.5 py-1 rounded bg-blue-600 hover:bg-blue-500 text-white text-xs">
+                Download .MD
+              </button>
+            </div>
+            <p class="text-xs text-gray-400">
+              Generates a publication-grade markdown research report detailing methodology, Tsirelson bound proofs, and benchmark results.
+            </p>
+            <div id="reportPreview" class="w-full h-64 bg-gray-950 border border-gray-800 rounded-lg p-3 font-mono text-xs text-gray-300 overflow-y-auto custom-scroll leading-relaxed">
+              Click "Generate Full Report" below to compile live data into Markdown...
+            </div>
+          </div>
+          <button onclick="generateReportLive()" class="w-full py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs shadow-lg shadow-emerald-600/20 transition-all">
+            Generate Full Report with Live Data
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-gray-800/80 py-4 px-6 text-center text-xs text-gray-500 font-mono">
+    Quantum Bell Platform &copy; 2026 &bull; Computational & Experimental Entanglement Research
+  </footer>
+
+  <!-- Core Client-Side Quantum Engine (Modular JavaScript Fallback) -->
+  <script type="module">
+    import { Complex } from './src/core/complex.js';
+    import { Matrix } from './src/core/matrix.js';
+    import { STATES } from './src/core/states.js';
+    import { horodeckiMaxCHSH } from './src/core/horodecki.js';
+    import { pptNegativity, wernerBoundaries, wernerConcurrence } from './src/core/entanglement.js';
+    import { NoiseChannels } from './src/noise/channels.js';
+    import { ReadoutNoiseModel } from './src/noise/readout.js';
+    import { ClassicalLHVSimulator } from './src/classical/lhv_simulator.js';
+    import { CHSHEngine } from './src/simulation/chsh_engine.js';
+    import { QuantumCircuitSimulator } from './src/simulation/circuit_sim.js';
+    import { gridSearchOptimize } from './src/optimization/grid_search.js';
+    import { differentialEvolutionOptimize } from './src/optimization/differential_evolution.js';
+    import { spsaOptimize } from './src/optimization/spsa.js';
+    import { bayesianOptimize } from './src/optimization/bayesian_opt.js';
+    import { NoiseAdaptiveOptimizer } from './src/optimization/adaptive_na_uao.js';
+    import { BenchmarkRunner } from './src/benchmarks/benchmark_runner.js';
+    import { MockQPU, HARDWARE_PRESETS } from './src/hardware/mock_qpu.js';
+    import { ReportGenerator } from './src/report/report_generator.js';
+
+    // Expose modules to window for seamless dual client/server operation
+    window.QuantumCore = {
+      Complex, Matrix, STATES, horodeckiMaxCHSH, pptNegativity, wernerBoundaries,
+      wernerConcurrence, NoiseChannels, ReadoutNoiseModel, ClassicalLHVSimulator,
+      CHSHEngine, QuantumCircuitSimulator, gridSearchOptimize,
+      differentialEvolutionOptimize, spsaOptimize, bayesianOptimize,
+      NoiseAdaptiveOptimizer, BenchmarkRunner, MockQPU, HARDWARE_PRESETS, ReportGenerator
+    };
+
+    console.log('[QuantumBellPlatform] Quantum engine loaded successfully.');
+    // Trigger initial evaluation once loaded
+    window.initPlatform();
+  </script>
+
+  <!-- UI Controller Logic -->
   <script>
-    const elA = document.getElementById('angA');
-    const elAPrime = document.getElementById('angAPrime');
-    const elB = document.getElementById('angB');
-    const elBPrime = document.getElementById('angBPrime');
-    const elNoise = document.getElementById('noiseP');
+    let isBackendConnected = false;
+    let latestReportMarkdown = '';
 
-    const lblA = document.getElementById('lblA');
-    const lblAPrime = document.getElementById('lblAPrime');
-    const lblB = document.getElementById('lblB');
-    const lblBPrime = document.getElementById('lblBPrime');
-    const lblNoise = document.getElementById('lblNoise');
+    // Tab Switching
+    window.switchTab = function(tabName) {
+      document.querySelectorAll('.tab-view').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('bg-blue-600', 'text-white');
+        btn.classList.add('text-gray-400');
+      });
 
-    const sVal = document.getElementById('sVal');
-    const badge = document.getElementById('violationBadge');
-    const meterFill = document.getElementById('meterFill');
+      const activeView = document.getElementById('view-' + tabName);
+      const activeBtn = document.getElementById('tab-' + tabName);
+      if (activeView) activeView.classList.remove('hidden');
+      if (activeBtn) {
+        activeBtn.classList.remove('text-gray-400');
+        activeBtn.classList.add('bg-blue-600', 'text-white');
+      }
 
-    const eAB = document.getElementById('eAB');
-    const eABp = document.getElementById('eABp');
-    const eApB = document.getElementById('eApB');
-    const eApBp = document.getElementById('eApBp');
+      if (tabName === 'circuit') updateQASM();
+    };
 
-    function calcCorrelator(aDeg, bDeg, p) {
-      const rad = ((aDeg - bDeg) * Math.PI) / 180;
-      return (1 - p) * Math.cos(rad);
-    }
-
-    function update() {
-      const a = parseFloat(elA.value);
-      const ap = parseFloat(elAPrime.value);
-      const b = parseFloat(elB.value);
-      const bp = parseFloat(elBPrime.value);
-      const p = parseFloat(elNoise.value) / 100;
-
-      lblA.textContent = a + '°';
-      lblAPrime.textContent = ap + '°';
-      lblB.textContent = b + '°';
-      lblBPrime.textContent = bp + '°';
-      lblNoise.textContent = (p * 100).toFixed(1) + '%';
-
-      const E_ab = calcCorrelator(a, b, p);
-      const E_abp = calcCorrelator(a, bp, p);
-      const E_apb = calcCorrelator(ap, b, p);
-      const E_apbp = calcCorrelator(ap, bp, p);
-
-      const S = Math.abs(E_ab + E_abp + E_apb - E_apbp);
-
-      eAB.textContent = (E_ab >= 0 ? '+' : '') + E_ab.toFixed(3);
-      eABp.textContent = (E_abp >= 0 ? '+' : '') + E_abp.toFixed(3);
-      eApB.textContent = (E_apb >= 0 ? '+' : '') + E_apb.toFixed(3);
-      eApBp.textContent = (E_apbp >= 0 ? '+' : '') + E_apbp.toFixed(3);
-
-      sVal.textContent = S.toFixed(4);
-
-      const tsirelson = 2 * Math.SQRT2;
-      const pct = Math.min(100, Math.max(0, (S / tsirelson) * 100));
-      meterFill.style.width = pct.toFixed(1) + '%';
-
-      if (S > 2.0001) {
-        badge.className = 'px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/15 text-emerald-500 border border-emerald-500/30';
-        badge.textContent = 'Quantum Nonlocal (+ ' + (((S - 2.0) / 2.0) * 100).toFixed(1) + '%)';
-      } else if (p < 0.6667) {
-        badge.className = 'px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-500/15 text-amber-500 border border-amber-500/30';
-        badge.textContent = 'Entangled (Local Realist)';
-      } else {
-        badge.className = 'px-2 py-0.5 rounded text-[10px] font-semibold bg-zinc-500/15 text-zinc-400 border border-zinc-500/30';
-        badge.textContent = 'Separable (Classical)';
+    // Check Backend Server Status
+    async function checkBackend() {
+      try {
+        const res = await fetch('/api/status', { method: 'GET', signal: AbortSignal.timeout(2000) });
+        if (res.ok) {
+          const data = await res.json();
+          isBackendConnected = true;
+          document.getElementById('backendPing').className = 'w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse';
+          document.getElementById('backendStatusText').textContent = 'Backend: Connected (Port 3000)';
+          return true;
+        }
+      } catch (e) {
+        // Fallback to client-side mode
+        isBackendConnected = false;
+        document.getElementById('backendPing').className = 'w-2.5 h-2.5 rounded-full bg-blue-500';
+        document.getElementById('backendStatusText').textContent = 'Client-Side Engine Active';
+        return false;
       }
     }
 
-    [elA, elAPrime, elB, elBPrime, elNoise].forEach(input => {
-      input.addEventListener('input', update);
-    });
+    // Hardware Preset Helper
+    window.applyPreset = function(preset) {
+      const depol = document.getElementById('noiseDepol');
+      const gamma = document.getElementById('noiseGamma');
+      const lambda = document.getElementById('noiseLambda');
+      const readout = document.getElementById('noiseReadout');
 
-    document.getElementById('btnOptimal').addEventListener('click', () => {
-      elA.value = 0; elAPrime.value = 90; elB.value = 45; elBPrime.value = -45; elNoise.value = 0;
-      update();
-    });
+      if (preset === 'ideal') {
+        depol.value = 0; gamma.value = 0; lambda.value = 0; readout.value = 0;
+      } else if (preset === 'eagle') {
+        depol.value = 3.5; gamma.value = 2.0; lambda.value = 2.5; readout.value = 2.8;
+      } else if (preset === 'noisy') {
+        depol.value = 12.0; gamma.value = 8.0; lambda.value = 10.0; readout.value = 6.5;
+      }
+      runEvaluation();
+    };
 
-    document.getElementById('btnCritNoise').addEventListener('click', () => {
-      elA.value = 0; elAPrime.value = 90; elB.value = 45; elBPrime.value = -45; elNoise.value = 29.3;
-      update();
-    });
+    // Angle Preset Helper
+    window.applyAnglePreset = function(type) {
+      if (type === 'bell') {
+        document.getElementById('thetaA').value = 0;
+        document.getElementById('thetaAPrime').value = 90;
+        document.getElementById('thetaB').value = 45;
+        document.getElementById('thetaBPrime').value = -45;
+      } else if (type === 'align') {
+        document.getElementById('thetaA').value = 0;
+        document.getElementById('thetaAPrime').value = 90;
+        document.getElementById('thetaB').value = 0;
+        document.getElementById('thetaBPrime').value = 90;
+      }
+      runEvaluation();
+    };
 
-    document.getElementById('btnMaxEnt').addEventListener('click', () => {
-      elA.value = 0; elAPrime.value = 90; elB.value = 45; elBPrime.value = -45; elNoise.value = 66.7;
-      update();
-    });
+    // Main Quantum Evaluation Runner
+    window.runEvaluation = async function() {
+      const stateType = document.getElementById('stateType').value;
+      const genDiv = document.getElementById('genStateControls');
+      if (stateType === 'generalized') genDiv.classList.remove('hidden');
+      else genDiv.classList.add('hidden');
 
-    update();
+      const alphaDeg = parseFloat(document.getElementById('inputAlpha').value);
+      const phiDeg = parseFloat(document.getElementById('inputPhi').value);
+      const alphaRad = (alphaDeg * Math.PI) / 180;
+      const phiRad = (phiDeg * Math.PI) / 180;
+      document.getElementById('lblAlpha').textContent = alphaDeg.toFixed(1) + '°';
+      document.getElementById('lblPhi').textContent = phiDeg.toFixed(1) + '°';
+
+      const depolPct = parseFloat(document.getElementById('noiseDepol').value);
+      const gammaPct = parseFloat(document.getElementById('noiseGamma').value);
+      const lambdaPct = parseFloat(document.getElementById('noiseLambda').value);
+      const readoutPct = parseFloat(document.getElementById('noiseReadout').value);
+
+      document.getElementById('lblDepol').textContent = depolPct.toFixed(1) + '%';
+      document.getElementById('lblGamma').textContent = gammaPct.toFixed(1) + '%';
+      document.getElementById('lblLambda').textContent = lambdaPct.toFixed(1) + '%';
+      document.getElementById('lblReadout').textContent = readoutPct.toFixed(1) + '%';
+
+      const thADeg = parseFloat(document.getElementById('thetaA').value);
+      const thAPDeg = parseFloat(document.getElementById('thetaAPrime').value);
+      const thBDeg = parseFloat(document.getElementById('thetaB').value);
+      const thBPDeg = parseFloat(document.getElementById('thetaBPrime').value);
+
+      document.getElementById('lblThetaA').textContent = thADeg.toFixed(1) + '°';
+      document.getElementById('lblThetaAPrime').textContent = thAPDeg.toFixed(1) + '°';
+      document.getElementById('lblThetaB').textContent = thBDeg.toFixed(1) + '°';
+      document.getElementById('lblThetaBPrime').textContent = thBPDeg.toFixed(1) + '°';
+
+      const thARad = (thADeg * Math.PI) / 180;
+      const thAPRad = (thAPDeg * Math.PI) / 180;
+      const thBRad = (thBDeg * Math.PI) / 180;
+      const thBPRad = (thBPDeg * Math.PI) / 180;
+
+      const shots = parseInt(document.getElementById('shotsSelector').value, 10);
+
+      // Update Bloch compass vectors
+      updateCompass(thARad, thAPRad, thBRad, thBPRad);
+
+      const payload = {
+        stateType,
+        alpha: alphaRad,
+        phi: phiRad,
+        depolarizingP: depolPct / 100,
+        amplitudeDampingGamma: gammaPct / 100,
+        phaseDampingLambda: lambdaPct / 100,
+        readoutError: readoutPct / 100,
+        thetaA: thARad,
+        thetaAPrime: thAPRad,
+        thetaB: thBRad,
+        thetaBPrime: thBPRad,
+        shots
+      };
+
+      let data;
+      if (isBackendConnected) {
+        try {
+          const res = await fetch('/api/evaluate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          data = await res.json();
+        } catch (e) {
+          data = evaluateLocally(payload);
+        }
+      } else {
+        data = evaluateLocally(payload);
+      }
+
+      renderSimResults(data);
+    };
+
+    function updateCompass(a, ap, b, bp) {
+      const len = 70;
+      const setVec = (id, rad) => {
+        const el = document.getElementById(id);
+        if (el) {
+          // Bloch sphere theta from Z (top) to X (right)
+          const x = len * Math.sin(rad);
+          const y = -len * Math.cos(rad);
+          el.setAttribute('x2', x.toFixed(1));
+          el.setAttribute('y2', y.toFixed(1));
+        }
+      };
+      setVec('vecA', a);
+      setVec('vecAP', ap);
+      setVec('vecB', b);
+      setVec('vecBP', bp);
+    }
+
+    function evaluateLocally(p) {
+      if (!window.QuantumCore) return null;
+      const C = window.QuantumCore;
+      let baseRho;
+      if (p.stateType === 'phiMinus') baseRho = C.STATES.rhoPhiMinus();
+      else if (p.stateType === 'psiPlus') baseRho = C.STATES.rhoPsiPlus();
+      else if (p.stateType === 'psiMinus') baseRho = C.STATES.rhoPsiMinus();
+      else if (p.stateType === 'werner') baseRho = C.STATES.wernerState(p.depolarizingP);
+      else if (p.stateType === 'generalized') baseRho = C.Matrix.fromStateVector(C.STATES.generalizedAlphaPhi(p.alpha, p.phi));
+      else baseRho = C.STATES.rhoPhiPlus();
+
+      const noiseConfig = {
+        depolarizingP: p.stateType === 'werner' ? 0 : p.depolarizingP,
+        amplitudeDampingGamma: p.amplitudeDampingGamma,
+        phaseDampingLambda: p.phaseDampingLambda
+      };
+
+      const angles = {
+        thetaA: p.thetaA, thetaAPrime: p.thetaAPrime,
+        thetaB: p.thetaB, thetaBPrime: p.thetaBPrime
+      };
+
+      let exp;
+      if (p.shots === 0) {
+        const noisy = C.NoiseChannels.compositeNoise(baseRho, noiseConfig);
+        const theo = C.CHSHEngine.evaluateTheoretical(noisy, angles);
+        exp = {
+          measuredS: theo.S, stdErr: 0, zScore: theo.S > 2 ? Infinity : 0, pValue: theo.S > 2 ? 0 : 0.5,
+          ci95: [theo.S, theo.S], totalShots: 0,
+          samples: {
+            ab: { measuredCorrelation: theo.correlations.E_ab },
+            abPrime: { measuredCorrelation: theo.correlations.E_abPrime },
+            aPrimeB: { measuredCorrelation: theo.correlations.E_aPrimeB },
+            aPrimeBPrime: { measuredCorrelation: theo.correlations.E_aPrimeBPrime }
+          }
+        };
+      } else {
+        exp = C.CHSHEngine.runExperiment({
+          state: baseRho, angles, shotsPerSetting: Math.floor(p.shots / 4), noiseConfig
+        });
+      }
+
+      const noisyRho = C.NoiseChannels.compositeNoise(baseRho, noiseConfig);
+      const horodecki = C.horodeckiMaxCHSH(noisyRho);
+      const ppt = C.pptNegativity(noisyRho);
+
+      return {
+        experiment: exp,
+        horodecki: { sMax: horodecki.sMax, eigenvalues: horodecki.eigenvalues },
+        entanglement: { pptNegativity: ppt.negativity, logNegativity: ppt.logNegativity, isEntangled: ppt.isEntangled }
+      };
+    }
+
+    function renderSimResults(data) {
+      if (!data) return;
+      const exp = data.experiment;
+      const S = exp.measuredS;
+      const se = exp.stdErr;
+
+      document.getElementById('dispS').textContent = S.toFixed(4);
+      document.getElementById('dispStdErr').textContent = se > 0 ? `± ${se.toFixed(4)} (N = ${exp.totalShots})` : `± 0.0000 (Analytical)`;
+
+      // Meter fill
+      const tsirelson = 2 * Math.SQRT2;
+      const pct = Math.min(100, Math.max(0, (S / tsirelson) * 100));
+      document.getElementById('sMeterFill').style.width = pct.toFixed(1) + '%';
+
+      // Badge
+      const badge = document.getElementById('simBadge');
+      if (S > 2.0001) {
+        badge.className = 'text-[10px] font-mono px-2 py-0.5 rounded font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30';
+        badge.textContent = 'NONLOCAL';
+      } else {
+        badge.className = 'text-[10px] font-mono px-2 py-0.5 rounded font-semibold bg-yellow-500/10 text-yellow-400 border border-yellow-500/30';
+        badge.textContent = 'CLASSICAL REALM';
+      }
+
+      // Statistical significance
+      const zDisp = exp.zScore === Infinity ? '∞' : exp.zScore.toFixed(2) + 'σ';
+      document.getElementById('dispZScore').textContent = zDisp;
+      document.getElementById('dispPValue').textContent = exp.pValue === 0 ? 'p < 10⁻¹⁵' : `p = ${exp.pValue.toExponential(3)}`;
+      document.getElementById('dispCI').textContent = `95% CI: [${exp.ci95[0].toFixed(4)}, ${exp.ci95[1].toFixed(4)}]`;
+
+      // 5-sigma discovery badge
+      const fBadge = document.getElementById('fiveSigmaBadge');
+      if (exp.zScore >= 5.0 || exp.zScore === Infinity) {
+        fBadge.className = 'text-[10px] font-mono px-2 py-0.5 rounded font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30';
+        fBadge.textContent = '5σ Confirmed';
+      } else {
+        fBadge.className = 'text-[10px] font-mono px-2 py-0.5 rounded font-semibold bg-gray-800 text-gray-400 border border-gray-700';
+        fBadge.textContent = '< 5σ Boundary';
+      }
+
+      // Horodecki
+      if (data.horodecki) {
+        document.getElementById('dispHMax').textContent = data.horodecki.sMax.toFixed(4);
+        const sumU = data.horodecki.eigenvalues[0] + data.horodecki.eigenvalues[1];
+        document.getElementById('dispHoroEigen').textContent = `u1+u2: ${sumU.toFixed(4)} ${sumU > 1 ? '> 1.0 (Violates)' : '≤ 1.0'}`;
+      }
+
+      // Entanglement
+      if (data.entanglement) {
+        document.getElementById('dispNegativity').textContent = data.entanglement.pptNegativity.toFixed(4);
+        document.getElementById('dispLogNeg').textContent = `Log Neg: ${data.entanglement.logNegativity.toFixed(3)}`;
+        const entBadge = document.getElementById('entangleBadge');
+        if (data.entanglement.isEntangled) {
+          entBadge.className = 'text-[10px] font-mono px-2 py-0.5 rounded font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30';
+          entBadge.textContent = 'ENTANGLED';
+        } else {
+          entBadge.className = 'text-[10px] font-mono px-2 py-0.5 rounded font-semibold bg-gray-800 text-gray-400 border border-gray-700';
+          entBadge.textContent = 'SEPARABLE';
+        }
+      }
+
+      // Individual Correlators
+      const samples = exp.samples;
+      const setCorr = (lblId, barId, val) => {
+        document.getElementById(lblId).textContent = (val >= 0 ? '+' : '') + val.toFixed(4);
+        const barPct = Math.min(100, Math.abs(val) * 100);
+        document.getElementById(barId).style.width = barPct.toFixed(1) + '%';
+      };
+      setCorr('corrAB', 'barAB', samples.ab.measuredCorrelation);
+      setCorr('corrABPrime', 'barABPrime', samples.abPrime.measuredCorrelation);
+      setCorr('corrAPrimeB', 'barAPrimeB', samples.aPrimeB.measuredCorrelation);
+      setCorr('corrAPrimeBPrime', 'barAPrimeBPrime', samples.aPrimeBPrime.measuredCorrelation);
+    }
+
+    // Classical LHV Simulation
+    window.runLHVSimulation = async function() {
+      const btn = document.getElementById('btnRunLHV');
+      btn.textContent = 'Simulating...';
+      btn.disabled = true;
+
+      const trials = parseInt(document.getElementById('lhvTrials').value, 10);
+      const payload = {
+        thetaA: 0, thetaAPrime: Math.PI / 2, thetaB: Math.PI / 4, thetaBPrime: -Math.PI / 4, trials
+      };
+
+      let res;
+      if (isBackendConnected) {
+        try {
+          const apiRes = await fetch('/api/lhv', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          res = await apiRes.json();
+        } catch (e) {
+          res = window.QuantumCore.ClassicalLHVSimulator.simulateCHSH(payload, Math.floor(trials / 4));
+        }
+      } else {
+        res = window.QuantumCore.ClassicalLHVSimulator.simulateCHSH(payload, Math.floor(trials / 4));
+      }
+
+      document.getElementById('lhvMeasuredS').textContent = res.measuredS.toFixed(4);
+      document.getElementById('lhvStdErr').textContent = `± ${res.stdErr.toFixed(4)} (N = ${trials.toLocaleString()})`;
+      document.getElementById('lhvEAB').textContent = res.settings.E_ab.toFixed(4);
+      document.getElementById('lhvEABp').textContent = res.settings.E_abPrime.toFixed(4);
+      document.getElementById('lhvEApB').textContent = res.settings.E_aPrimeB.toFixed(4);
+      document.getElementById('lhvEApBp').textContent = res.settings.E_aPrimeBPrime.toFixed(4);
+
+      btn.textContent = 'Execute 100k Trials';
+      btn.disabled = false;
+    };
+
+    // Optimization Suite Benchmark
+    window.runBenchmarksSuite = async function() {
+      const btn = document.getElementById('btnRunBench');
+      btn.textContent = 'Benchmarking 7 Algorithms...';
+      btn.disabled = true;
+
+      let res;
+      if (isBackendConnected) {
+        try {
+          const apiRes = await fetch('/api/benchmarks', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ preset: 'ibmEagleTypical', shotBudget: 4096 })
+          });
+          res = await apiRes.json();
+        } catch (e) {
+          res = window.QuantumCore.BenchmarkRunner.runAlgorithmComparison({ shotBudget: 4096 });
+        }
+      } else {
+        res = window.QuantumCore.BenchmarkRunner.runAlgorithmComparison({ shotBudget: 4096 });
+      }
+
+      // Populate Table
+      const tbody = document.getElementById('benchTableBody');
+      tbody.innerHTML = '';
+
+      const chartCont = document.getElementById('benchChartContainer');
+      chartCont.innerHTML = '';
+
+      const maxVal = 3.0;
+
+      res.algorithms.forEach((alg, idx) => {
+        const sVal = typeof alg.sValue === 'number' ? alg.sValue.toFixed(4) : 'N/A';
+        const seVal = alg.stdErr ? `± ${alg.stdErr.toFixed(4)}` : '-';
+        const zVal = alg.zScore === Infinity ? '∞' : (alg.zScore ? `${alg.zScore.toFixed(1)}σ` : '-');
+
+        const tr = document.createElement('tr');
+        tr.className = idx === 6 ? 'bg-emerald-950/20 text-emerald-300 font-bold' : 'hover:bg-gray-800/30';
+        tr.innerHTML = `
+          <td class="py-2.5 px-3 font-medium ${idx === 6 ? 'text-emerald-400' : 'text-gray-200'}">${alg.algorithm}</td>
+          <td class="py-2.5 px-3 text-blue-400 font-bold">${sVal}</td>
+          <td class="py-2.5 px-3 text-gray-400">${seVal}</td>
+          <td class="py-2.5 px-3 text-purple-400">${zVal}</td>
+          <td class="py-2.5 px-3 text-gray-400">${alg.evaluationsOrShots}</td>
+          <td class="py-2.5 px-3 text-gray-400 text-[10px]">${alg.note}</td>
+        `;
+        tbody.appendChild(tr);
+
+        // Chart Bar
+        if (typeof alg.sValue === 'number') {
+          const barH = Math.min(100, Math.max(10, (alg.sValue / maxVal) * 100));
+          const col = idx === 6 ? 'bg-emerald-500' : (idx === 0 ? 'bg-purple-500' : 'bg-blue-600');
+          const bar = document.createElement('div');
+          bar.className = 'flex flex-col items-center flex-1 h-full justify-end group relative';
+          bar.innerHTML = `
+            <span class="text-[9px] mono text-gray-400 mb-1 opacity-0 group-hover:opacity-100 transition-opacity">${sVal}</span>
+            <div class="${col} w-full rounded-t transition-all duration-500" style="height: ${barH}%;"></div>
+            <span class="text-[9px] mono text-gray-500 mt-1 truncate max-w-[45px]">${idx + 1}</span>
+          `;
+          chartCont.appendChild(bar);
+        }
+      });
+
+      // Highlights
+      if (res.nauaoSummary) {
+        const hDiv = document.getElementById('nauaoHighlights');
+        hDiv.classList.remove('hidden');
+        document.getElementById('nauaoSummaryText').textContent =
+          `Variance reduction vs uniform: ${res.nauaoSummary.varianceReductionPct.toFixed(2)}% | Optimal Neyman shot allocation: [${res.nauaoSummary.neymanAllocations.join(', ')}] | Z-Score: ${res.nauaoSummary.zScore.toFixed(2)}σ.`;
+      }
+
+      btn.textContent = 'Run All 7 Benchmarks';
+      btn.disabled = false;
+    };
+
+    // Parameter Sweep Plotter
+    window.runParameterSweep = async function() {
+      const btn = document.getElementById('btnRunSweep');
+      btn.textContent = 'Sweeping p in [0, 0.40]...';
+      btn.disabled = true;
+
+      let res;
+      if (isBackendConnected) {
+        try {
+          const apiRes = await fetch('/api/sweep', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ steps: 21 })
+          });
+          res = await apiRes.json();
+        } catch (e) {
+          res = { sweep: window.QuantumCore.BenchmarkRunner.runDepolarizingSweep(21) };
+        }
+      } else {
+        res = { sweep: window.QuantumCore.BenchmarkRunner.runDepolarizingSweep(21) };
+      }
+
+      const svg = document.getElementById('sweepSvg');
+      svg.innerHTML = '';
+
+      const width = 560;
+      const height = 200;
+      const padX = 40;
+      const padY = 20;
+
+      // Draw grid lines
+      const yClassical = height - padY - ((2.0 / 3.0) * (height - 2 * padY));
+      const yTsirelson = height - padY - (((2 * Math.SQRT2) / 3.0) * (height - 2 * padY));
+
+      let gridHtml = `
+        <line x1="${padX}" y1="${padY}" x2="${padX}" y2="${height - padY}" stroke="#374151" stroke-width="1"/>
+        <line x1="${padX}" y1="${height - padY}" x2="${width - padX}" y2="${height - padY}" stroke="#374151" stroke-width="1"/>
+        <!-- Classical Bound Line -->
+        <line x1="${padX}" y1="${yClassical}" x2="${width - padX}" y2="${yClassical}" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="4,4"/>
+        <text x="${width - padX + 5}" y="${yClassical + 4}" fill="#f59e0b" font-size="10" font-family="monospace">2.0</text>
+        <!-- Tsirelson Bound Line -->
+        <line x1="${padX}" y1="${yTsirelson}" x2="${width - padX}" y2="${yTsirelson}" stroke="#10b981" stroke-width="1" stroke-dasharray="2,2"/>
+        <text x="${width - padX + 5}" y="${yTsirelson + 4}" fill="#10b981" font-size="10" font-family="monospace">2.828</text>
+        <text x="${padX - 30}" y="${height - padY + 4}" fill="#6b7280" font-size="10" font-family="monospace">0.0</text>
+        <text x="${width - padX}" y="${height - padY + 15}" fill="#6b7280" font-size="10" font-family="monospace">40% p</text>
+      `;
+
+      // Plot curves
+      let horoPoints = [];
+      let fixedPoints = [];
+      const pts = res.sweep;
+
+      pts.forEach((pt, i) => {
+        const x = padX + (i / (pts.length - 1)) * (width - 2 * padX);
+        const yHoro = height - padY - ((pt.theoreticalMaxS / 3.0) * (height - 2 * padY));
+        const yFixed = height - padY - ((pt.fixedAngleS / 3.0) * (height - 2 * padY));
+        horoPoints.push(`${x.toFixed(1)},${yHoro.toFixed(1)}`);
+        fixedPoints.push(`${x.toFixed(1)},${yFixed.toFixed(1)}`);
+      });
+
+      gridHtml += `
+        <polyline fill="none" stroke="#a855f7" stroke-width="2.5" points="${horoPoints.join(' ')}" />
+        <polyline fill="none" stroke="#3b82f6" stroke-width="2" stroke-dasharray="3,1" points="${fixedPoints.join(' ')}" />
+      `;
+
+      svg.innerHTML = gridHtml;
+
+      btn.textContent = 'Execute Noise Sweep';
+      btn.disabled = false;
+    };
+
+    // OpenQASM update
+    window.updateQASM = async function() {
+      const stateType = document.getElementById('stateType').value;
+      const thA = (parseFloat(document.getElementById('thetaA').value) * Math.PI) / 180;
+      const thB = (parseFloat(document.getElementById('thetaB').value) * Math.PI) / 180;
+
+      let code = '';
+      if (window.QuantumCore) {
+        code = window.QuantumCore.QuantumCircuitSimulator.toOpenQASM2({
+          stateType, thetaA: thA, thetaB: thB
+        });
+      }
+      document.getElementById('qasmOutput').value = code;
+    };
+
+    window.copyQASM = function() {
+      const txt = document.getElementById('qasmOutput');
+      txt.select();
+      navigator.clipboard.writeText(txt.value);
+      alert('OpenQASM code copied to clipboard!');
+    };
+
+    // Report Generator
+    window.generateReportLive = async function() {
+      let md = '';
+      if (isBackendConnected) {
+        try {
+          const res = await fetch('/api/report', { method: 'POST', body: JSON.stringify({}) });
+          const d = await res.json();
+          md = d.markdown;
+        } catch (e) {
+          md = generateLocalReport();
+        }
+      } else {
+        md = generateLocalReport();
+      }
+
+      latestReportMarkdown = md;
+      document.getElementById('reportPreview').textContent = md;
+    };
+
+    function generateLocalReport() {
+      if (!window.QuantumCore) return '';
+      const C = window.QuantumCore;
+      const comp = C.BenchmarkRunner.runAlgorithmComparison({ shotBudget: 4096 });
+      const sweep = C.BenchmarkRunner.runDepolarizingSweep(15);
+      return C.ReportGenerator.generateMarkdownReport(comp, sweep, null);
+    }
+
+    window.downloadReport = function() {
+      if (!latestReportMarkdown) latestReportMarkdown = generateLocalReport();
+      const blob = new Blob([latestReportMarkdown], { type: 'text/markdown' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'quantum_bell_research_report.md';
+      a.click();
+      URL.revokeObjectURL(url);
+    };
+
+    // Init function
+    window.initPlatform = async function() {
+      await checkBackend();
+      runEvaluation();
+      runLHVSimulation();
+      runBenchmarksSuite();
+      runParameterSweep();
+      updateQASM();
+    };
   </script>
 </body>
 </html>

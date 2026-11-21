@@ -52,8 +52,10 @@ A research-grade computational quantum experimentation and benchmarking platform
 quantum-bell-platform/
 ├── package.json               # Platform configuration and npm scripts
 ├── README.md                  # Complete documentation and mathematical guide
+├── index.html                 # Minimalist research dashboard frontend
 ├── src/
 │   ├── index.js               # Library entry point
+│   ├── server.js              # Native Node.js REST API & static file web server
 │   ├── core/
 │   │   ├── complex.js         # Complex number class and primitives
 │   │   ├── matrix.js          # Kronecker product, partial trace/transpose, Jacobi eig
@@ -82,6 +84,7 @@ quantum-bell-platform/
 │   └── report/
 │       └── report_generator.js # Automated research report and CSV/JSON export
 ├── scripts/
+│   ├── test_pipeline.js       # End-to-end 3-cycle pipeline verification test
 │   ├── run_chsh_demo.js       # Basic demonstration and statistical validation
 │   ├── run_classical_lhv.js   # 100,000 trials classical LHV simulation
 │   ├── run_benchmarks.js      # Benchmarks comparing all 7 algorithms
@@ -97,6 +100,19 @@ quantum-bell-platform/
 ---
 
 ## 3. Quick Start & Execution
+
+### Starting the Web Dashboard & REST API
+```bash
+# Starts the server on http://localhost:3000
+npm start
+```
+Then navigate to `http://localhost:3000` in any web browser to interact with the full dashboard.
+
+### Running End-to-End Pipeline Verification
+```bash
+# Executes 3 full verification cycles testing all API endpoints, physics bounds, and optimizations
+npm run test:pipeline
+```
 
 ### Running the Demonstrations (Node.js)
 ```bash

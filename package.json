@@ -5,6 +5,9 @@
   "type": "module",
   "main": "src/index.js",
   "scripts": {
+    "start": "node src/server.js",
+    "server": "node src/server.js",
+    "test:pipeline": "node scripts/test_pipeline.js",
     "test": "node scripts/run_chsh_demo.js",
     "lhv": "node scripts/run_classical_lhv.js",
     "benchmark": "node scripts/run_benchmarks.js",
